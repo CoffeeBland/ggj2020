@@ -20,5 +20,5 @@ require('./io').setup(server);
 require('./room').setup();
 
 // Finalize setup
-console.log('Listening on port:', process.env.SERVER_PORT);
-server.listen(process.env.SERVER_PORT);
+console.log('Listening on port:', process.env.SERVER_PORT || 1337);
+server.listen(process.env.SERVER_PORT || 1337);
