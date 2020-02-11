@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Global Game Jam 2020</title>
+        <link rel="stylesheet" href="client/style.scss">
+    </head>
+    <body>
+        <form id="register">
+            <h2>Connexion</h2>
+            <label>
+                <span>Nom</span>
+                <input type="text" name="name" placeholder="- - - -" />
+            </label>
+            <button name="create" type="submit">Créer une salle</button>
+            <label>
+                <span>Salle</span>
+                <input type="text" name="room" placeholder="- - - -">
+            </label>
+            <button name="join" type="submit">Rejoindre</button>
+            <p class="danger"></p>
+        </form>
+        <div id="game">
+            <h2></h2>
+            <h3></h3>
+            <div class="timer"><div class="current"></div></div>
+            <div class="peep prompt"></div>
+            <div class="peep choice"></div>
+            <div class="peep match"></div>
+            <button name="propose" type="button">Propose</button>
+            <form>
+                <button name="start" type="button">Lancer une partie</button>
+                <button name="quit" type="button">Quitter</button>
+            </form>
+        </div>
+        <script src="client/index.js"></script>
+    </body>
+</html>

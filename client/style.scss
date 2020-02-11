@@ -1,0 +1,241 @@
+$back-100: #fff;
+$back-200: darken($back-100, 6%);
+$back-150: darken($back-100, 9%);
+$back-300: darken($back-100, 12%);
+$font-100: #333;
+$font-200: lighten($font-100, 6%);
+$font-300: lighten($font-100, 12%);
+$error: red;
+$spacing: 0.5rem;
+$indent: $spacing * 0.5;
+@mixin shadow-top($color) {
+    box-shadow: 0 $indent 0 $color inset;
+}
+@mixin shadow-bottom($color) {
+    box-shadow: 0 (-$indent) 0 $color inset;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+html {
+    font-family: sans-serif;
+    color: $font-100;
+    background: $back-100;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body>:not(.show) {
+    display: none !important;
+}
+
+#game, #lobbies, #lobby {
+    width: 100%;
+    height: 100%;
+}
+
+.danger {
+    color: $error;
+    &:empty::after {
+        content: " ";
+        display: inline-block;
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: $spacing;
+
+    h2, p {
+        width: 100%;
+        white-space: pre-line;
+    }
+    >* {
+        margin: $spacing;
+    }
+}
+
+input, button {
+    color: $font-100;
+    border: none;
+    background: none;
+    font-size: 1em;
+    letter-spacing: 1px;
+}
+
+:focus { outline: none; }
+::-moz-focus-inner { border: none; }
+
+
+label, button {
+    border-radius: $spacing;
+    padding: $spacing $spacing * 2;
+    background: $back-200;
+}
+
+label {
+    @include shadow-top($back-300);
+    flex-grow: 1;
+    width: 14rem;
+    padding-top: $spacing + $indent;
+
+    span {
+        color: $font-300;
+        &:after {
+            content: ":";
+        }
+    }
+
+    input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+button {
+    line-height: 2rem;
+    vertical-align: middle;
+    font-weight: 600;
+
+    &:disabled, &:not(:active) {
+        @include shadow-bottom($back-300);
+        padding-bottom: $spacing + $indent;
+    }
+    &:not(:disabled):active {
+        @include shadow-top($back-300);
+        padding-top: $spacing + $indent;
+    }
+
+    &:not(:disabled) {
+        cursor: pointer;
+        &:hover {
+            background: $back-150;
+        }
+    }
+
+    &:focus {
+        text-decoration: underline;
+    }
+}
+
+ul {
+    background: $back-200;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: auto;
+}
+
+li {
+    margin: $spacing * 2;
+    button {
+        background: $back-100;
+    }
+    form {
+        padding: 0;
+        margin: -$spacing;
+    }
+}
+
+#register {
+    max-width: 40rem;
+}
+
+#game {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "name users";
+
+    h2 { grid-area: name; }
+    h3 { grid-area: users; }
+    .prompt { grid-area: prompt; }
+    .choice { grid-area: choice; }
+    .match { grid-area: match; }
+    .timer { grid-area: timer; }
+    [name=propose] { grid-area: propose; }
+    form {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .peep, .timer, [name=propose] {
+        display: none;
+    }
+}
+
+#game.state {
+    &-prompt {
+        grid-template-areas:
+            "name   users"
+            "prompt prompt"
+            "timer  timer";
+        .timer {
+            display: initial;
+        }
+        .prompt {
+            display: flex;
+        }
+    }
+    &-choice {
+        grid-template-areas:
+            "name    users"
+            "prompt  choice"
+            "propose propose"
+            "timer   timer";
+        .timer,
+        [name=propose] {
+            display: initial;
+        }
+        .prompt,
+        .choice {
+            display: flex;
+        }
+    }
+    &-vote,
+    &-end {
+        grid-template-areas:
+            "name   users"
+            "prompt match"
+            "timer  timer";
+        .timer {
+            display: initial;
+        }
+        .prompt,
+        .match {
+            display: flex;
+        }
+    }
+}
+
+.peep {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+    }
+}
+
+.timer {
+    background: $back-300;
+    .current {
+        background: $font-300;
+        height: 1em;
+    }
+}
