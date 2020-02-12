@@ -3,7 +3,6 @@ MAKEFLAGS += -j$(NPROCS)
 
 #!make
 include .env
-include settings
 
 peeps = $(wildcard client/assets/peeps/*.png)
 
