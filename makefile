@@ -3,6 +3,7 @@ MAKEFLAGS += -j$(NPROCS)
 
 #!make
 include .env
+include .deploy
 
 peeps = $(wildcard client/assets/peeps/*.png)
 
@@ -22,3 +23,10 @@ img: $(imgs)
 clean:
 	@echo "Removing parts folders"
 	@rm -rf client/assets/parts
+
+build: img
+	@yarn
+	@yarn build
+
+deploy: build
+	rsync -az dist/ $(DEPLOY) --progress --delete

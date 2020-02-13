@@ -30,13 +30,14 @@ function show(node) {
 socket.on('connect', () => show($register));
 socket.on('disconnect', () => alert("He's dead jim."));
 
-$register.addEventListener('submit', e => {
-    e.preventDefault();
-    socket.emit('room:' + e.explicitOriginalTarget.name,
-        Array.from($register.elements)
-        .filter(e => e.name && e.value)
-        .reduce((obj, e) => (obj[e.name] = e.value, obj), {}));
-});
+$register.querySelectorAll('[type=submit]').forEach($submit =>
+    $submit.addEventListener('click', e => {
+        e.preventDefault();
+        socket.emit('room:' + $submit.name,
+            Array.from($register.elements)
+            .filter(e => e.name && e.value)
+            .reduce((obj, e) => (obj[e.name] = e.value, obj), {}));
+    }));
 
 $game.querySelector('[name=quit]').onclick = () => socket.emit('room:left');
 $game.querySelector('[name=start]').onclick = () => socket.emit('room:start');
@@ -57,12 +58,14 @@ class Game {
         $match.addEventListener('mousedown',
             this.$matchMouseDown = ({ clientX }) =>
                 this.mouseStart = clientX);
+        $match.addEventListener('touchstart', this.$matchMouseDown);
         $match.addEventListener('mouseup',
             this.$matchMouseUp = ({ clientX }) =>
                 socket.emit('game:vote', {
                     index: this.matchIndex,
                     vote: clientX > this.mouseStart
                 }));
+        $match.addEventListener('touchend', this.$matchMouseUp);
     }
 
     cleanup() {
@@ -97,10 +100,15 @@ class Game {
                 ondragstart: e => e.preventDefault(),
                 // TODO: This probably doesn't work.
                 onmousedown: ({ clientX }) => this.mouseStart = clientX,
+                ontouchstart: ({ touches }) => this.mouseStart = touches[0].clientX,
                 onmouseup: ({ clientX }) =>
                     this.setPartChoice(
                         part_i,
-                        this.choice[part_i] + Math.sign(clientX - this.mouseStart))
+                        this.choice[part_i] + Math.sign(clientX - this.mouseStart)),
+                ontouchend: ({ changedTouches }) =>
+                    this.setPartChoice(
+                        part_i,
+                        this.choice[part_i] + Math.sign(changedTouches[0].clientX - this.mouseStart)),
             })));
 
         this.$matchImgs && this.$matchImgs.forEach(i => i.remove());
