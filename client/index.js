@@ -49,6 +49,7 @@ socket.on('register:error', msg => {
 
 class Game {
     constructor() {
+        this.state = undefined;
         $propose.addEventListener('click',
             this.onProposeChoice = () =>
                 socket.emit('game:choice', this.choice));
@@ -69,6 +70,7 @@ class Game {
     }
 
     cleanup() {
+        $game.querySelector('[name=menu-toggle]').checked = false;
         $prompt.innerHTML = '';
         $choice.innerHTML = '';
         $match.innerHTML = '';
@@ -82,7 +84,7 @@ class Game {
     get duration() { return this._duration; }
     set duration(duration) {
         this._duration = duration;
-        $timerCurrent.style.width = `${Math.floor(100 * duration.current / duration.total)}%`;
+        $timerCurrent.style.width = `${100 * duration.current / duration.total}%`;
     }
 
     get parts() { return this._parts; }
@@ -151,9 +153,7 @@ class Game {
     get matches() { return this._matches; }
     set matches(matches) {
         this._matches = matches;
-        const index = this._matches.findIndex(({ voted }) => !voted);
-        if (index >= 0)
-            this.matchIndex = index;
+        this.matchIndex = this._matches.findIndex(({ voted }) => !voted);
     }
 
     get matchIndex() { return this._matchIndex; }
@@ -165,22 +165,31 @@ class Game {
     get match() { return this._match; }
     set match(match) {
         this._match = match;
-        match.choice.forEach((peep_i, part_i) =>
-            this.setImgSrc(
-                this.$matchImgs[part_i],
-                this.peeps[peep_i],
-                this.parts[part_i]));
+        if (match)
+            match.choice.forEach((peep_i, part_i) =>
+                this.setImgSrc(
+                    this.$matchImgs[part_i],
+                    this.peeps[peep_i],
+                    this.parts[part_i]));
+        else
+            this.$matchImgs.forEach($img => this.setImgSrc($img));
     }
 
     get state() { return this._state; }
     set state(state) {
+        $game.classList.remove('lobby');
         this._state && $game.classList.remove(`state-${this._state}`);
         this._state = state;
-        state && $game.classList.add(`state-${state}`);
+        $game.classList.add(state ? `state-${state}` : 'lobby');
     }
 
     setImgSrc(img, peep, part) {
         //// TODO this is pretty dumb
+        if (!peep || !part) {
+            return img.classList.add('hidden');
+        } else {
+            img.classList.remove('hidden');
+        }
         img.style.maxHeight = `${100 * this.heights[this.parts.indexOf(part)] / this.heights.reduce((a, b) => a + b, 0)}%`;
         img.srcset = this.widths
         .map((width, i) => `parts/${peep}-${part}-${width}.png ${width}w`)
@@ -191,7 +200,7 @@ class Game {
 class Room {
     constructor() {
         this.$roomName = $game.querySelector('h2');
-        this.$users = $game.querySelector('h3');
+        this.$users = $game.querySelector('.users');
     }
 
     get id() { return this._id; }
@@ -203,7 +212,8 @@ class Room {
     get users() { return this._users; }
     set users(users) {
         this._users = users;
-        this.$users.innerText = users.map(({ name }) => name).join(', ');
+        this.$users.innerHTML = '';
+        users.forEach(({ name }) => this.$users.appendChild($('li', {}, document.createTextNode(name))));
     }
 
     userJoined(user) {
@@ -217,8 +227,6 @@ class Room {
 
 let game;
 let room;
-
-window.bab = () => game;
 
 const updateGame = given => {
     if (!game || (given.id && given.id !== game.id)) {

@@ -19,7 +19,11 @@ const conf = {
         duration: 3 * 1000
     },
     choice: {
-        choices: 6
+        choices: 6,
+        duration: 30 * 1000
+    },
+    vote: {
+        duration: 60 * 1000
     },
     end: {
         duration: 30 * 1000
@@ -66,10 +70,17 @@ states.choice = {
                 this.checkChoices();
             });
         });
+
+        this.startTimer(
+            () => {
+                this.room.users
+                    .filter(u => u.choices && !u.choice)
+                    .forEach(u => u.choice = new Array(u.choices.length).fill(0));
+                this.checkChoices();
+            },
+            conf.choice.duration);
     },
     cleanupUser(user) {
-        delete user.choices;
-        delete user.choice;
         user.socket.removeAllListeners('game:choice');
     }
 };
@@ -106,8 +117,14 @@ states.vote = {
                 this.checkVotes();
             });
         });
+
+        this.startTimer(() =>
+            this.transition(states.end),
+            conf.vote.duration);
     },
     cleanupUser(user) {
+        delete user.choices;
+        delete user.choice;
         delete user.votes;
         user.socket.removeAllListeners('game:vote');
     }
@@ -119,8 +136,11 @@ states.end = {
             (rhs.positive.length - rhs.negative.length) -
             (lhs.positive.length - lhs.negative.length));
         this.match = this.matches[0];
-        this.startTimer(() => this.room.stopGame(), conf.end.duration);
         io.to(this.room.id).emit('game:update', formatters.game.match(this));
+
+        this.startTimer(() =>
+            this.room.stopGame(),
+            conf.end.duration);
     }
 };
 
@@ -156,8 +176,11 @@ class Game {
     }
 
     async transition(state) {
-        if (this.state)
-            this.state && this.state.exit && await this.state.exit.call(this);
+        if (this.state) {
+            this.state.exit && await this.state.exit.call(this);
+            this.state.cleanupUser && this.room.users.forEach(user =>
+                this.state.cleanupUser.call(this, user));
+        }
         this.stopTimer();
         this.state = state;
         this.state.enter && await this.state.enter.call(this);

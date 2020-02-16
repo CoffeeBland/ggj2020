@@ -22,17 +22,22 @@
             <p class="danger"></p>
         </form>
         <div id="game">
-            <h2></h2>
-            <h3></h3>
+            <input id="menu-toggle" name="menu-toggle" class="toggle" type="checkbox" />
+            <label for="menu-toggle" class="toggle-control">Menu</label>
+            <label for="menu-toggle" class="menu-cover"></label>
+            <div class="menu">
+                <form>
+                    <h2></h2>
+                    <button name="start" type="button">Lancer une partie</button>
+                    <button name="quit" type="button">Quitter</button>
+                </form>
+                <ul class="users"></ul>
+            </div>
             <div class="timer"><div class="current"></div></div>
             <div class="peep prompt"></div>
             <div class="peep choice"></div>
             <div class="peep match"></div>
             <button name="propose" type="button">Propose</button>
-            <form>
-                <button name="start" type="button">Lancer une partie</button>
-                <button name="quit" type="button">Quitter</button>
-            </form>
         </div>
         <script src="client/index.js"></script>
     </body>

@@ -37,6 +37,10 @@ body>:not(.show) {
     display: none !important;
 }
 
+.hidden {
+    display: none !important;
+}
+
 #game, #lobbies, #lobby {
     width: 100%;
     height: 100%;
@@ -78,17 +82,22 @@ input, button {
 ::-moz-focus-inner { border: none; }
 
 
-label, button {
+form label, button, .toggle-control {
+    width: 12rem;
     border-radius: $spacing;
     padding: $spacing $spacing * 2;
     background: $back-200;
 }
 
-label {
+form label {
     @include shadow-top($back-300);
-    flex-grow: 1;
-    width: 14rem;
     padding-top: $spacing + $indent;
+    flex-grow: 2;
+
+    span, input {
+        line-height: 1.2rem;
+        display: block;
+    }
 
     span {
         color: $font-300;
@@ -103,8 +112,9 @@ label {
     }
 }
 
-button {
-    line-height: 2rem;
+button, .toggle-control {
+    flex-grow: 1;
+    line-height: 2.4rem;
     vertical-align: middle;
     font-weight: 600;
 
@@ -148,6 +158,12 @@ li {
     }
 }
 
+.toggle {
+    position: fixed;
+    bottom: 100%;
+    right: 100%;
+}
+
 #register {
     max-width: 40rem;
 }
@@ -155,20 +171,15 @@ li {
 #game {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
-    grid-template-areas: "name users";
-
-    h2 { grid-area: name; }
-    h3 { grid-area: users; }
+    grid-template-rows: minmax(0, 1fr) auto auto;
     .prompt { grid-area: prompt; }
     .choice { grid-area: choice; }
     .match { grid-area: match; }
     .timer { grid-area: timer; }
-    [name=propose] { grid-area: propose; }
-    form {
-        position: absolute;
-        top: 0;
-        right: 0;
+    [name=propose] {
+        width: 100%;
+        grid-area: propose;
+        border-radius: 0;
     }
 
     .peep, .timer, [name=propose] {
@@ -176,10 +187,62 @@ li {
     }
 }
 
+.menu {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 20rem;
+    background: $back-100;
+    transition: transform 0.25s;
+
+    display: flex;
+    flex-direction: column;
+    ul {
+        flex-grow: 1;
+    }
+}
+.menu-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: none;
+    pointer-events: none;
+    transition: background 0.25s;
+}
+
+#game.lobby {
+    [name=menu-toggle], [for=menu-toggle] {
+        display: none;
+    }
+}
+
+#game:not(.lobby) {
+    [name=menu-toggle] {
+        &~.menu { transform: translateX(-100%); }
+        &:checked~.menu { transform: translateX(0%); }
+    }
+    .toggle-control {
+        position: absolute;
+        top: $spacing;
+        left: $spacing;
+        width: unset;
+    }
+    [name=menu-toggle]:checked~.menu-cover {
+        background: rgba(0, 0, 0, 0.5);
+        pointer-events: unset;
+    }
+}
+
 #game.state {
     &-prompt {
         grid-template-areas:
-            "name   users"
             "prompt prompt"
             "timer  timer";
         .timer {
@@ -191,7 +254,6 @@ li {
     }
     &-choice {
         grid-template-areas:
-            "name    users"
             "prompt  choice"
             "propose propose"
             "timer   timer";
@@ -207,7 +269,6 @@ li {
     &-vote,
     &-end {
         grid-template-areas:
-            "name   users"
             "prompt match"
             "timer  timer";
         .timer {
@@ -237,5 +298,6 @@ li {
     .current {
         background: $font-300;
         height: 1em;
+        transition: width 0.2s;
     }
 }
